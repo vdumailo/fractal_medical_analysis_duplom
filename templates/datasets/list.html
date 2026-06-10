@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Набори даних{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <div>
+        <span class="eyebrow">Керування даними</span>
+        <h1 class="display-6 mb-2">Набори медичних часових рядів</h1>
+        <p class="lead mb-0">Перегляд імпортованих наборів, контроль структури колонок і перехід до запуску аналітичних експериментів.</p>
+    </div>
+    <a href="{% url 'datasets:create' %}" class="btn btn-primary btn-lg">Додати набір даних</a>
+</div>
+{% endblock %}
+{% block content %}
+<div class="card app-card">
+    <div class="table-responsive">
+        <table class="table app-table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Назва</th>
+                    <th>Тип сигналу</th>
+                    <th>Інтервал</th>
+                    <th>Статус анонімізації</th>
+                    <th>Дата завантаження</th>
+                    <th class="text-end">Дія</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for dataset in datasets %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ dataset.title }}</div>
+                        <div class="small text-muted">{{ dataset.description|default:'Опис не задано.'|truncatechars:90 }}</div>
+                    </td>
+                    <td><span class="badge text-bg-light">{{ dataset.get_signal_type_display }}</span></td>
+                    <td>{{ dataset.sampling_interval }} с</td>
+                    <td>
+                        {% if dataset.is_anonymized %}
+                            <span class="badge text-bg-success">деперсоналізовано</span>
+                        {% else %}
+                            <span class="badge text-bg-warning">не зазначено</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dataset.created_at|date:'d.m.Y H:i' }}</td>
+                    <td class="text-end"><a href="{% url 'datasets:detail' dataset.pk %}" class="btn btn-sm btn-outline-primary">Відкрити</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-5">Набори даних відсутні. Почніть із завантаження демонстраційного або власного файлу.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

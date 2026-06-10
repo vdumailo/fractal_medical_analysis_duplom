@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Довідка{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm">
+    <div>
+        <span class="eyebrow">Довідкова підсистема</span>
+        <h1 class="display-6 mb-2">Інструкція користувача</h1>
+        <p class="lead mb-0">Сторінка описує формат даних, режими аналізу, фрактальні ознаки та результат, який формує система.</p>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="help-layout">
+    <section class="card app-card">
+        <div class="card-body p-4">
+            <h2 class="section-title">1. Формат вхідних даних</h2>
+            <p>Система працює з деперсоналізованими часовими рядами у форматах CSV, XLSX та XLS. Рекомендовані колонки: <code>time</code>, <code>value</code>, <code>label</code>, <code>subject_id</code>. Ручне введення назв колонок не є обов’язковим, бо під час імпорту структура визначається автоматично.</p>
+            <div class="tip-grid tip-grid-2 mt-3">
+                <div class="tip-card">
+                    <h3>Мінімум для аналізу</h3>
+                    <p>Достатньо однієї числової колонки з сигналом. Для класифікації додатково потрібна колонка міток класів.</p>
+                </div>
+                <div class="tip-card">
+                    <h3>Медичні приклади</h3>
+                    <p>ЕКГ, ЕЕГ, фотоплетизмограма, дихальний сигнал, глікемічний моніторинг або інші числові медичні послідовності.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card app-card">
+        <div class="card-body p-4">
+            <h2 class="section-title">2. Що робить система</h2>
+            <div class="workflow-cards">
+                <div class="feature-card"><h3>Попереднє оброблення</h3><p>Заповнення пропусків, згладжування, обмеження викидів, нормалізація, детрендинг і сегментація ковзним вікном.</p></div>
+                <div class="feature-card"><h3>Фрактальний аналіз</h3><p>Обчислення показника Герста, DFA-експоненти та фрактальних розмірностей Хігучі, Каца і Петросяна.</p></div>
+                <div class="feature-card"><h3>Інтелектуальний аналіз</h3><p>Класифікація, кластеризація або пошук аномальних сегментів на основі класичних, фрактальних чи комбінованих ознак.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card app-card">
+        <div class="card-body p-4">
+            <h2 class="section-title">3. Режими аналізу</h2>
+            <div class="workflow-cards workflow-cards-3">
+                <div class="feature-card"><h3>Класифікація</h3><p>Порівнює сегменти між класами і показує accuracy, precision, recall, F1, ROC-AUC та матрицю помилок.</p></div>
+                <div class="feature-card"><h3>Кластеризація</h3><p>Групує подібні сегменти без наперед заданих міток і показує silhouette score та Davies-Bouldin.</p></div>
+                <div class="feature-card"><h3>Пошук аномалій</h3><p>Визначає сегменти, які суттєво відрізняються від типової поведінки часового ряду.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card app-card">
+        <div class="card-body p-4">
+            <h2 class="section-title">4. Типовий сценарій роботи</h2>
+            <ol class="workflow-list">
+                <li>Завантажити файл із медичним часовим рядом.</li>
+                <li>Перевірити автоматично визначені колонки на сторінці набору даних.</li>
+                <li>Створити експеримент і вибрати режим аналізу.</li>
+                <li>Переглянути графіки, фрактальні характеристики, метрики та матрицю ознак.</li>
+                <li>Завантажити PDF-звіт для включення в матеріали дипломної роботи.</li>
+            </ol>
+        </div>
+    </section>
+</div>
+{% endblock %}

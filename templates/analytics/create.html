@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}Новий експеримент{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm">
+    <div>
+        <span class="eyebrow">Параметризація аналізу</span>
+        <h1 class="display-6 mb-2">Новий експеримент</h1>
+        <p class="lead mb-0">Набір даних: {{ dataset.title }}. Система автоматично підлаштовує алгоритми та параметри під вибраний режим.</p>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="page-grid">
+    <div>
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <h2 class="section-title mb-1">Налаштування експерименту</h2>
+                        <p class="helper-text mb-0">Заповніть основні параметри. Після натискання кнопки система одразу виконає оброблення та відкриє сторінку результатів.</p>
+                    </div>
+                    <span class="badge badge-soft">{{ dataset.get_signal_type_display }}</span>
+                </div>
+
+                {% if form.errors %}
+                    <div class="alert alert-danger form-error-summary" role="alert">
+                        <strong>Експеримент не запущено.</strong>
+                        <div class="small mt-1">Виправте поля з помилками нижче. Найчастіше проблема виникає через несумісний режим аналізу й алгоритм або занадто великий розмір вікна для короткого ряду.</div>
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate id="experiment-form">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="row g-3">
+                        <div class="col-md-7">{% include 'includes/form_field.html' with field=form.title %}</div>
+                        <div class="col-md-5">{% include 'includes/form_field.html' with field=form.mode %}</div>
+                        <div class="col-md-6" id="feature-set-wrap">{% include 'includes/form_field.html' with field=form.feature_set %}</div>
+                        <div class="col-md-6" id="model-wrap">{% include 'includes/form_field.html' with field=form.model_name %}</div>
+                        <div class="col-md-4" id="clusters-wrap">{% include 'includes/form_field.html' with field=form.n_clusters %}</div>
+                        <div class="col-md-4">{% include 'includes/form_field.html' with field=form.window_size %}</div>
+                        <div class="col-md-4">{% include 'includes/form_field.html' with field=form.step_size %}</div>
+                        <div class="col-md-4">{% include 'includes/form_field.html' with field=form.smoothing_window %}</div>
+                        <div class="col-md-4">{% include 'includes/form_field.html' with field=form.normalize %}</div>
+                        <div class="col-md-4">{% include 'includes/form_field.html' with field=form.detrend %}</div>
+                        <div class="col-md-6">{% include 'includes/form_field.html' with field=form.fill_missing %}</div>
+                        <div class="col-md-6">{% include 'includes/form_field.html' with field=form.remove_outliers %}</div>
+                        <div class="col-12">{% include 'includes/form_field.html' with field=form.notes %}</div>
+                    </div>
+                    <div class="quick-actions pt-2 align-items-center">
+                        <button type="submit" class="btn btn-primary btn-lg" id="run-button">
+                            <span class="button-label">Запустити аналіз</span>
+                            <span class="button-loading d-none"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Виконується аналіз...</span>
+                        </button>
+                        <a href="{% url 'datasets:detail' dataset.pk %}" class="btn btn-outline-secondary btn-lg">Повернутися до набору</a>
+                        <span class="small text-muted" id="mode-hint">Після запуску буде відкрито сторінку результатів.</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-4 sticky-panel">
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <h2 class="section-title">Швидкий старт</h2>
+                <div class="tip-grid">
+                    <div class="tip-card" data-tip="classification">
+                        <h3>Класифікація</h3>
+                        <p>Для дипломної демонстрації найкраще: комбіновані ознаки + Random Forest або порівняння всіх наборів.</p>
+                    </div>
+                    <div class="tip-card" data-tip="clustering">
+                        <h3>Кластеризація</h3>
+                        <p>Обирайте K-means або Agglomerative clustering. Параметр кількості кластерів буде показано тільки для цього режиму.</p>
+                    </div>
+                    <div class="tip-card" data-tip="anomaly">
+                        <h3>Пошук аномалій</h3>
+                        <p>Працює через Isolation Forest. Підходить для пошуку нетипових сегментів у сигналі.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <h2 class="section-title">Перевірка перед запуском</h2>
+                <ul class="compact-list mb-0">
+                    <li>Для коротких рядів зменшіть <strong>розмір вікна</strong> і <strong>крок сегментації</strong>.</li>
+                    <li>Для класифікації у файлі має бути колонка міток класів.</li>
+                    <li>Для аномалій і кластеризації мітки класів не потрібні.</li>
+                    <li>Якщо експеримент завершиться помилкою, причина буде показана на сторінці результатів.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+(function () {
+    const form = document.getElementById('experiment-form');
+    const modeSelect = document.getElementById('id_mode');
+    const featureSelect = document.getElementById('id_feature_set');
+    const modelSelect = document.getElementById('id_model_name');
+    const clustersWrap = document.getElementById('clusters-wrap');
+    const nClustersInput = document.getElementById('id_n_clusters');
+    const modeHint = document.getElementById('mode-hint');
+    const runButton = document.getElementById('run-button');
+
+    if (!modeSelect || !featureSelect || !modelSelect) return;
+
+    const originalOptions = Array.from(modelSelect.options).map(option => ({
+        value: option.value,
+        label: option.textContent,
+    }));
+
+    const modelMap = {
+        classification: ['random_forest', 'logistic_regression', 'svm'],
+        clustering: ['kmeans', 'agglomerative', 'dbscan'],
+        anomaly: ['isolation_forest'],
+    };
+
+    const defaultModel = {
+        classification: 'random_forest',
+        clustering: 'kmeans',
+        anomaly: 'isolation_forest',
+    };
+
+    const hints = {
+        classification: 'Класифікація потребує міток класів у наборі даних.',
+        clustering: 'Кластеризація групує сегменти без попередніх міток.',
+        anomaly: 'Пошук аномалій виділяє нетипові сегменти сигналу.',
+    };
+
+    function rebuildModels(mode) {
+        const allowed = modelMap[mode] || [];
+        const current = modelSelect.value;
+        modelSelect.innerHTML = '';
+        originalOptions
+            .filter(option => allowed.includes(option.value))
+            .forEach(option => {
+                const item = document.createElement('option');
+                item.value = option.value;
+                item.textContent = option.label;
+                modelSelect.appendChild(item);
+            });
+        modelSelect.value = allowed.includes(current) ? current : (defaultModel[mode] || '');
+    }
+
+    function syncForm() {
+        const mode = modeSelect.value;
+        rebuildModels(mode);
+
+        const showClusters = mode === 'clustering';
+        clustersWrap.classList.toggle('d-none', !showClusters);
+        if (nClustersInput && !nClustersInput.value) nClustersInput.value = 3;
+
+        if (mode !== 'classification' && featureSelect.value === 'compare') {
+            featureSelect.value = 'combined';
+        }
+
+        const compareOption = Array.from(featureSelect.options).find(option => option.value === 'compare');
+        if (compareOption) {
+            compareOption.disabled = mode !== 'classification';
+            compareOption.textContent = mode === 'classification'
+                ? 'Порівняти всі набори'
+                : 'Порівняння всіх наборів недоступне для цього режиму';
+        }
+
+        if (modeHint) modeHint.textContent = hints[mode] || 'Після запуску буде відкрито сторінку результатів.';
+        document.querySelectorAll('[data-tip]').forEach(card => {
+            card.classList.toggle('tip-card-active', card.dataset.tip === mode);
+        });
+    }
+
+    modeSelect.addEventListener('change', syncForm);
+    syncForm();
+
+    if (form && runButton) {
+        form.addEventListener('submit', function () {
+            runButton.disabled = true;
+            runButton.querySelector('.button-label').classList.add('d-none');
+            runButton.querySelector('.button-loading').classList.remove('d-none');
+        });
+    }
+})();
+</script>
+{% endblock %}

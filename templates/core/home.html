@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Головна{% endblock %}
+{% block page_intro %}
+<div class="page-hero">
+    <div class="row g-4 align-items-center">
+        <div class="col-lg-8">
+            <span class="eyebrow">Дипломний вебзастосунок</span>
+            <h1 class="display-5 mb-3">Інформаційна технологія оброблення медичних даних часовими рядами з фрактальною структурою</h1>
+            <p class="lead mb-4">Система реалізує повний цикл роботи з медичними часовими рядами: імпорт даних, попереднє оброблення, фрактальний аналіз, інтелектуальну обробку, порівняння ознак, візуалізацію результатів та формування структурованого PDF-звіту.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/datasets/create/" class="btn btn-primary btn-lg">Завантажити набір даних</a>
+                <a href="/analytics/" class="btn btn-outline-primary btn-lg">Переглянути експерименти</a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel-grid">
+                <div class="metric-panel">
+                    <div class="metric-label">Набори даних</div>
+                    <div class="metric-value">{{ datasets_count }}</div>
+                </div>
+                <div class="metric-panel">
+                    <div class="metric-label">Експерименти</div>
+                    <div class="metric-value">{{ experiments_count }}</div>
+                </div>
+                <div class="metric-panel metric-panel-wide">
+                    <div class="metric-label">Завершені експерименти</div>
+                    <div class="metric-value">{{ completed_experiments }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card app-card h-100">
+            <div class="card-body p-4">
+                <h2 class="section-title">Що виконує система</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><div class="feature-card"><h3>Імпорт і контроль якості</h3><p>Підтримується завантаження CSV та XLSX, перевірка структури колонок, виявлення пропусків і формування короткого паспорта набору даних.</p></div></div>
+                    <div class="col-md-6"><div class="feature-card"><h3>Попереднє оброблення</h3><p>Є інтерполяція пропусків, згладжування, усунення викидів, детрендинг, нормалізація та сегментація ковзним вікном.</p></div></div>
+                    <div class="col-md-6"><div class="feature-card"><h3>Фрактальний аналіз</h3><p>Обчислюються показник Герста, DFA-експонента, розмірності Хігучі, Каца та Петросяна.</p></div></div>
+                    <div class="col-md-6"><div class="feature-card"><h3>Інтелектуальний аналіз</h3><p>Система підтримує класифікацію, кластеризацію та пошук аномалій, а також порівняння класичних, фрактальних і комбінованих ознак.</p></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card app-card h-100">
+            <div class="card-body p-4">
+                <h2 class="section-title">Робочий сценарій</h2>
+                <ol class="workflow-list">
+                    <li>Завантажити деперсоналізований медичний часовий ряд.</li>
+                    <li>Вказати колонки часу, значень, міток та ідентифікатора серії.</li>
+                    <li>Створити експеримент і задати параметри препроцесингу.</li>
+                    <li>Обрати режим аналізу та набір ознак.</li>
+                    <li>Отримати графіки, метрики, фрагмент матриці ознак і PDF-звіт.</li>
+                </ol>
+                <a href="/help/" class="btn btn-outline-primary w-100 mt-2">Відкрити довідку</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card app-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="section-title mb-0">Останні набори даних</h2>
+                    <a href="/datasets/" class="small-link">Усі набори</a>
+                </div>
+                {% if latest_datasets %}
+                    <div class="list-stack">
+                        {% for dataset in latest_datasets %}
+                            <a class="list-card" href="{% url 'datasets:detail' dataset.pk %}">
+                                <div>
+                                    <div class="fw-semibold">{{ dataset.title }}</div>
+                                    <div class="small text-muted">{{ dataset.created_at|date:'d.m.Y H:i' }}</div>
+                                </div>
+                                <span class="badge text-bg-light">{{ dataset.get_signal_type_display }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">Наразі набори даних відсутні.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card app-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="section-title mb-0">Останні експерименти</h2>
+                    <a href="/analytics/" class="small-link">Усі експерименти</a>
+                </div>
+                {% if latest_experiments %}
+                    <div class="list-stack">
+                        {% for experiment in latest_experiments %}
+                            <a class="list-card" href="{% url 'analytics:detail' experiment.pk %}">
+                                <div>
+                                    <div class="fw-semibold">{{ experiment.title }}</div>
+                                    <div class="small text-muted">{{ experiment.dataset.title }} • {{ experiment.get_mode_display }}</div>
+                                </div>
+                                <span class="badge {% if experiment.status == 'completed' %}text-bg-success{% elif experiment.status == 'failed' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ experiment.get_status_display }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">Експериментів поки що немає.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

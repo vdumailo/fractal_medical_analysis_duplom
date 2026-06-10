@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Новий набір даних{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm">
+    <div>
+        <span class="eyebrow">Імпорт даних</span>
+        <h1 class="display-6 mb-2">Завантаження набору даних</h1>
+        <p class="lead mb-0">Основний сценарій спрощено: файл завантажується, структура колонок визначається автоматично, а ручне уточнення використовується лише за потреби.</p>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="page-grid">
+    <div>
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <h2 class="section-title mb-1">Параметри імпорту</h2>
+                        <p class="helper-text mb-0">Система автоматично аналізує назви колонок і намагається самостійно знайти час, сигнал, мітки та суб’єкта.</p>
+                    </div>
+                    <span class="badge badge-soft">CSV / XLSX / XLS</span>
+                </div>
+                <div class="info-box mb-4">
+                    <strong>Рекомендація.</strong> Спочатку заповніть лише базові поля та виберіть файл. Колонки часу, значень, міток і суб’єкта можна залишати порожніми.
+                </div>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="row g-3">
+                        <div class="col-md-7">{% include 'includes/form_field.html' with field=form.title %}</div>
+                        <div class="col-md-5">{% include 'includes/form_field.html' with field=form.signal_type %}</div>
+                        <div class="col-12">{% include 'includes/form_field.html' with field=form.description %}</div>
+                        <div class="col-md-6">{% include 'includes/form_field.html' with field=form.file %}</div>
+                        <div class="col-md-6">{% include 'includes/form_field.html' with field=form.sampling_interval %}</div>
+                    </div>
+
+                    <div class="advanced-section mt-4">
+                        <div class="advanced-section__header d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                            <div>
+                                <div class="section-header">Ручне уточнення структури</div>
+                                <div class="helper-text">Заповнюйте лише тоді, коли автоматичне визначення не спрацює або потрібен повний контроль.</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#manual-columns" aria-expanded="false" aria-controls="manual-columns">
+                                Показати поля колонок
+                            </button>
+                        </div>
+                        <div class="collapse" id="manual-columns">
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">{% include 'includes/form_field.html' with field=form.time_column %}</div>
+                                <div class="col-md-6">{% include 'includes/form_field.html' with field=form.value_column %}</div>
+                                <div class="col-md-6">{% include 'includes/form_field.html' with field=form.label_column %}</div>
+                                <div class="col-md-6">{% include 'includes/form_field.html' with field=form.subject_column %}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">{% include 'includes/form_field.html' with field=form.is_anonymized %}</div>
+                    <div class="d-flex gap-2 flex-wrap pt-2">
+                        <button class="btn btn-primary btn-lg">Зберегти набір даних</button>
+                        <a href="{% url 'datasets:list' %}" class="btn btn-outline-secondary btn-lg">Скасувати</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-4 sticky-panel">
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <h2 class="section-title">Що покращено для UX</h2>
+                <div class="tip-grid">
+                    <div class="tip-card">
+                        <h3>Автовизначення колонок</h3>
+                        <p>Поля <code>time</code>, <code>value</code>, <code>label</code> та <code>subject</code> можна не вводити вручну.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Нормальні помилки</h3>
+                        <p>Якщо колонку не знайдено, система показує зрозуміле повідомлення і перелік доступних назв.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Безпечне завантаження</h3>
+                        <p>Підтримуються лише типові табличні формати. Для класифікації бажано мати колонку міток.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card app-card">
+            <div class="card-body p-4">
+                <h2 class="section-title">Мінімальна структура файлу</h2>
+                <div class="dataset-columns">
+                    <span class="badge">time</span>
+                    <span class="badge">value</span>
+                    <span class="badge">label</span>
+                    <span class="badge">subject_id</span>
+                </div>
+                <p class="helper-text mt-3 mb-0">Назви можуть відрізнятися. Головне, щоб була хоча б одна числова колонка із сигналом.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Fractal Medical Analytics{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="/">Fractal Medical Analytics</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Перемикання навігації">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="/datasets/">Набори даних</a>
+                <a class="nav-link" href="/analytics/">Експерименти</a>
+                <a class="nav-link" href="/help/">Довідка</a>
+            </div>
+            <div class="navbar-nav align-items-lg-center gap-2">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text small text-white-50">Користувач: {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-light">Вийти</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'login' %}">Увійти</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="page-shell py-4 pb-lg-5">
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block page_intro %}{% endblock %}
+    </div>
+</header>
+
+<main class="container content-offset pb-5">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="border-top bg-white mt-auto">
+    <div class="container py-3 d-flex flex-column flex-lg-row justify-content-between gap-2 small text-muted">
+        <div>Вебзастосунок для оброблення медичних часових рядів з фрактальною структурою.</div>
+        <div>Python • Django • SQLite • Plotly • scikit-learn</div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

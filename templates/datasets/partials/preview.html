@@ -1,0 +1,50 @@
+{% load core_extras %}
+<div class="card app-card mb-4">
+    <div class="card-body p-4">
+        <h2 class="section-title">Зведення набору даних</h2>
+        <div class="kpi-strip">
+            <div class="metric-box"><div class="small text-muted">Рядків</div><div class="metric-number">{{ summary.rows }}</div></div>
+            <div class="metric-box"><div class="small text-muted">Колонок</div><div class="metric-number">{{ summary.columns }}</div></div>
+            <div class="metric-box"><div class="small text-muted">Пропусків</div><div class="metric-number">{{ summary.missing_values }}</div></div>
+            <div class="metric-box"><div class="small text-muted">Числових колонок</div><div class="metric-number">{{ summary.numeric_columns|length }}</div></div>
+        </div>
+        <div class="info-box mt-3"><strong>Колонки у файлі:</strong> {{ summary.column_names|join:', ' }}</div>
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <div class="tip-card h-100">
+                    <h3>Автоматично визначені поля</h3>
+                    <div class="dataset-columns mt-2">
+                        {% for key, value in summary.inferred_columns.items %}
+                            {% if value %}<span class="badge">{{ key|prettify_key }}: {{ value }}</span>{% endif %}
+                        {% empty %}
+                            <span class="helper-text">Автоматичне визначення не дало результату.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tip-card h-100">
+                    <h3>Числові колонки</h3>
+                    <div class="dataset-columns mt-2">
+                        {% for col in summary.numeric_columns %}<span class="badge">{{ col }}</span>{% empty %}<span class="helper-text">Числові колонки не знайдено.</span>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card app-card">
+    <div class="card-body p-0">
+        <div class="section-header px-4 pt-4 pb-2">Попередній перегляд перших рядків</div>
+        <div class="table-responsive">
+            <table class="table app-table table-sm table-striped align-middle mb-0">
+                <thead><tr>{% for col in preview_columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+                <tbody>
+                    {% for row in preview %}
+                        <tr>{% for col in preview_columns %}<td>{{ row|get_item:col }}</td>{% endfor %}</tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

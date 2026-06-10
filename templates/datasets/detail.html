@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ dataset.title }}{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm d-flex justify-content-between align-items-start gap-3 flex-wrap">
+    <div>
+        <span class="eyebrow">Паспорт набору даних</span>
+        <h1 class="display-6 mb-2">{{ dataset.title }}</h1>
+        <p class="lead mb-0">{{ dataset.get_signal_type_display }} • інтервал дискретизації {{ dataset.sampling_interval }} с</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'analytics:create' dataset.pk %}" class="btn btn-primary btn-lg">Створити експеримент</a>
+        <a href="{% url 'datasets:delete' dataset.pk %}" class="btn btn-outline-danger btn-lg">Видалити</a>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card app-card mb-4"><div class="card-body p-4">
+            <h2 class="section-title">Опис та структура</h2>
+            <p class="mb-3">{{ dataset.description|default:'Опис не задано.' }}</p>
+            <dl class="info-grid small mb-0">
+                <div><dt>Колонка часу</dt><dd>{{ dataset.time_column|default:'не задано' }}</dd></div>
+                <div><dt>Колонка значень</dt><dd>{{ dataset.value_column }}</dd></div>
+                <div><dt>Колонка міток</dt><dd>{{ dataset.label_column|default:'не задано' }}</dd></div>
+                <div><dt>Колонка суб'єкта</dt><dd>{{ dataset.subject_column|default:'не задано' }}</dd></div>
+                <div><dt>Анонімізація</dt><dd>{{ dataset.is_anonymized|yesno:'так,ні' }}</dd></div>
+            </dl>
+            <div class="info-box mt-3">
+                Доступні колонки у файлі: {{ summary.column_names|join:', ' }}
+            </div>
+        </div></div>
+        <div class="card app-card"><div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="section-title mb-0">Останні експерименти</h2>
+                {% if experiments %}<span class="badge text-bg-light">{{ experiments|length }}</span>{% endif %}
+            </div>
+            {% if experiments %}
+                <div class="list-stack">
+                    {% for experiment in experiments %}
+                        <a class="list-card" href="{% url 'analytics:detail' experiment.pk %}">
+                            <div>
+                                <div class="fw-semibold">{{ experiment.title }}</div>
+                                <div class="small text-muted">{{ experiment.get_mode_display }}</div>
+                            </div>
+                            <span class="badge {% if experiment.status == 'completed' %}text-bg-success{% elif experiment.status == 'failed' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ experiment.get_status_display }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">Експериментів ще немає.</div>
+            {% endif %}
+        </div></div>
+    </div>
+    <div class="col-lg-8">
+        <div id="dataset-preview" hx-get="{% url 'datasets:preview' dataset.pk %}" hx-trigger="load" hx-swap="innerHTML">
+            <div class="card app-card"><div class="card-body p-4">Завантаження попереднього перегляду…</div></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Експерименти{% endblock %}
+{% block page_intro %}
+<div class="page-hero page-hero-sm">
+    <div>
+        <span class="eyebrow">Аналітичні сценарії</span>
+        <h1 class="display-6 mb-2">Запущені експерименти</h1>
+        <p class="lead mb-0">Тут зібрані всі сценарії класифікації, кластеризації та пошуку аномалій для завантажених медичних часових рядів.</p>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="card app-card">
+    <div class="table-responsive">
+        <table class="table app-table table-hover align-middle mb-0">
+            <thead><tr><th>Назва</th><th>Набір даних</th><th>Режим</th><th>Ознаки</th><th>Статус</th><th class="text-end"></th></tr></thead>
+            <tbody>
+            {% for experiment in experiments %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ experiment.title }}</div>
+                        <div class="small text-muted">{{ experiment.model_name }} • {{ experiment.created_at|date:'d.m.Y H:i' }}</div>
+                    </td>
+                    <td>{{ experiment.dataset.title }}</td>
+                    <td>{{ experiment.get_mode_display }}</td>
+                    <td>{{ experiment.get_feature_set_display }}</td>
+                    <td><span class="badge {% if experiment.status == 'completed' %}text-bg-success{% elif experiment.status == 'failed' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ experiment.get_status_display }}</span></td>
+                    <td class="text-end"><a href="{% url 'analytics:detail' experiment.pk %}" class="btn btn-sm btn-outline-primary">Відкрити</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-5">Експериментів немає. Створіть новий сценарій з картки набору даних.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
